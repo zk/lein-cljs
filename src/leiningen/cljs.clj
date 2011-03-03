@@ -1,5 +1,5 @@
 (ns leiningen.cljs
-  (:use [cljs.watch])
+  (:require [cljs.watch :as watch])
   (:require [clojure.java.io :as io]
             [cljs.stitch :as stitch]
             [leiningen.install]
@@ -51,15 +51,13 @@
 (defn cljs-watch [project args]
   (let [cljs-opts (merge {:source-path "src/cljs"
                           :output-path "resources/public/js"}
-                         (:cljs project)
-                         (apply hash-map args))
+                         (:cljs project))
         src-path (:source-path cljs-opts)
         out-path (:output-path cljs-opts)]
     (when-not (ls out-path)
       (println "Output directory" out-path "not found, creating.")
       (ensure-directory! out-path))
-    (println "Watching" src-path "for changes...")
-    (start-watch src-path out-path)))
+    (watch/start-watch-project project)))
 
 (def idt "  ")
 
@@ -239,7 +237,7 @@
               jar-file
               (JarFile. jar-file true))
         entries (enumeration-seq (.entries jar))
-        target-file #(file target-dir (.getName %))]
+        target-file #(io/file target-dir (.getName %))]
     (doseq [entry entries :when (not (.isDirectory entry))
             :let [f (target-file entry)]]
       (.mkdirs (.getParentFile f))
@@ -278,7 +276,6 @@ function in that namespace will be used as the main-class for executable jar."
 (defn cljs
   ^{:doc "cljs compiler interface"}
   [project & args]
-  (println (:cljs project))
   (let [cmd (first args)
         args (rest args)
         cljs-opts (parse-cljs-opts project)

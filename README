@@ -1,10 +1,12 @@
 # lein-cljs
 
-FIXME: write description
+Leiningen plugin for cljs.
 
 ## Usage
 
-FIXME: write
+1. Clone repo
+2. lein install
+
 
 ## License
 
