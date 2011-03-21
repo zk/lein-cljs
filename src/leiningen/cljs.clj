@@ -16,7 +16,8 @@
            (java.util.regex Pattern)
            (java.util.jar JarFile)
            (java.io BufferedOutputStream FileOutputStream
-                    ByteArrayInputStream)))
+                    ByteArrayInputStream
+                    File)))
 
 (defn parse-project [path-or-project]
   (if (map? path-or-project)
@@ -40,6 +41,9 @@
         (when (.exists file)
           [path])))))
 
+(defn exists [path]
+  (.exists (File. path)))
+
 (defn mkdir [path]
   (.mkdirs (io/file path)))
 
@@ -56,10 +60,10 @@
                 test-path
                 test-output-path]} cljs-opts]
     (cond
-     (not (ls source-path)) (println "Source path" source-path "dosen't exist.")
-     (not (ls source-output-path)) (println "Source output path" source-path "dosen't exist.")
-     (not (ls test-path)) (println "Test path" test-path "dosen't exist.")
-     (not (ls test-output-path)) (println "Test output path" test-output-path "dosen't exist.")
+     (not (exists source-path)) (println "Source path" source-path "dosen't exist.")
+     (not (exists source-output-path)) (println "Source output path" source-path "dosen't exist.")
+     (not (exists test-path)) (println "Test path" test-path "dosen't exist.")
+     (not (exists test-output-path)) (println "Test output path" test-output-path "dosen't exist.")
      :else (watch/start-watch-opts cljs-opts))))
 
 (def idt "  ")
