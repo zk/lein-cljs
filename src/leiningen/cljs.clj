@@ -1,18 +1,17 @@
 (ns leiningen.cljs
-  (:require [cljs.watch :as watch])
-  (:require [clojure.java.io :as io]
-            [cljs.stitch :as stitch]
+  (:use [clojure.pprint]
+        [leiningen.deps :only [deps]])
+  (:require [cljs.watch :as watch]
+            [clojure.java.io :as io]
+            [cljs.compile :as cc]
+            [cljs.opts :as opts]
             [leiningen.install]
-            [leiningen.jar])
-  (:use [clojure.pprint])
-  (:require [robert.hooke :as hooke]
-            [leiningen.jar])
-  (:require [leiningen.compile :as compile]
+            [leiningen.jar]
+            [robert.hooke :as hooke]
+            [leiningen.compile :as compile]
             [clojure.string :as string]
-            [lancet])
-  (:require [leiningen.pom :as pom]
-            [clojure.java.io :as io])
-  (:use [leiningen.deps :only [deps]])
+            [lancet]
+            [leiningen.pom :as pom])
   (:import (java.util.jar Manifest JarEntry JarOutputStream)
            (java.util.regex Pattern)
            (java.util.jar JarFile)
@@ -34,11 +33,12 @@
 ;; Stolen from marginalia:
 (defn ls
   [path]
-  (let [file (java.io.File. path)]
-    (if (.isDirectory file)
-      (seq (.list file))
-      (when (.exists file)
-        [path]))))
+  (when path
+    (let [file (java.io.File. path)]
+      (if (.isDirectory file)
+        (seq (.list file))
+        (when (.exists file)
+          [path])))))
 
 (defn mkdir [path]
   (.mkdirs (io/file path)))
@@ -49,20 +49,23 @@
     (mkdir path)))
 
 (defn cljs-watch [project args]
-  (let [cljs-opts (merge {:source-path "src/cljs"
-                          :output-path "resources/public/js"}
+  (let [cljs-opts (merge opts/defaults
                          (:cljs project))
-        src-path (:source-path cljs-opts)
-        out-path (:output-path cljs-opts)]
-    (when-not (ls out-path)
-      (println "Output directory" out-path "not found, creating.")
-      (ensure-directory! out-path))
-    (watch/start-watch-project project)))
+        {:keys [source-path
+                source-output-path
+                test-path
+                test-output-path]} cljs-opts]
+    (cond
+     (not (ls source-path)) (println "Source path" source-path "dosen't exist.")
+     (not (ls source-output-path)) (println "Source output path" source-path "dosen't exist.")
+     (not (ls test-path)) (println "Test path" test-path "dosen't exist.")
+     (not (ls test-output-path)) (println "Test output path" test-output-path "dosen't exist.")
+     :else (watch/start-watch-opts cljs-opts))))
 
 (def idt "  ")
 
 (defn cljs-compile [project]
-  (stitch/stitch-project "./project.clj"))
+  (cc/opts (:cljs project)))
 
 ;; ------------ lein jar stuff ---------------
 
