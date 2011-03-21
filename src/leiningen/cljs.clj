@@ -59,12 +59,19 @@
                 source-output-path
                 test-path
                 test-output-path]} cljs-opts]
+    ;; source-path and source-output-path must exist.
     (cond
      (not (exists source-path)) (println "Source path" source-path "dosen't exist.")
      (not (exists source-output-path)) (println "Source output path" source-path "dosen't exist.")
-     (not (exists test-path)) (println "Test path" test-path "dosen't exist.")
-     (not (exists test-output-path)) (println "Test output path" test-output-path "dosen't exist.")
-     :else (watch/start-watch-opts cljs-opts))))
+     :else
+     (do
+       ;; complain that test-path and test-output-path don't exist,
+       ;; but start watcher anyway.
+       (when (not (exists test-path))
+         (println "Test path" test-path "dosen't exist."))
+       (when (not (exists test-output-path))
+         (println "Test output path" test-output-path "dosen't exist."))
+       (watch/start-watch-opts cljs-opts)))))
 
 (def idt "  ")
 
