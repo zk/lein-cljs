@@ -2,14 +2,18 @@
 
 Leiningen plugin for cljs.
 
+## Dev Deps
+
+`[lein-cljs "0.2.1"]`
+
+
 ## Usage
 
-1. Clone repo
-2. lein install
+See [http://github.com/zkim/cljs](http://github.com/zkim/cljs).
 
 
 ## License
 
-Copyright (C) 2010 FIXME
+Copyright (C) 2010 Zachary Kim
 
 Distributed under the Eclipse Public License, the same as Clojure.
